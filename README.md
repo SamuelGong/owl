@@ -370,6 +370,9 @@ For information on configuring AI models, please refer to our [CAMEL models docu
 OWL supports various LLM backends, though capabilities may vary depending on the model's tool calling and multimodal abilities. You can use the following scripts to run with different models:
 
 ```bash
+# Run with Claude model
+python examples/run_claude.py
+
 # Run with Qwen model
 python examples/run_qwen_zh.py
 
