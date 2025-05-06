@@ -50,42 +50,26 @@ def construct_society(question: str) -> RolePlaying:
     """
 
     # Create models for different components
+    base_model_config = {
+        "model_platform": ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
+        "model_type": "ep-20250212105505-5zlbx",  # doubao-1.5-pro
+        "api_key": os.getenv("ARK_API_KEY"),
+        "url": os.getenv("ARK_API_BASE_URL"),
+        "model_config_dict": {"temperature": 0.4, "max_tokens": 16384},  # max to set. Otherwise, it will fail
+    }
+    vision_model_config = {
+        "model_platform": ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
+        "model_type": "ep-20241217114719-kcgs9",  # doubao-vision-pro
+        "api_key": os.getenv("ARK_API_KEY"),
+        "url": os.getenv("ARK_API_BASE_URL"),
+        "model_config_dict": {"temperature": 0.4, "max_tokens": 4096},  # max to set. Otherwise, it will fail
+    }
     models = {
-        "user": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="ep-20250212105505-5zlbx",  # doubao-1.5-pro
-            api_key=os.getenv("ARK_API_KEY"),
-            url=os.getenv("ARK_API_BASE_URL"),
-            model_config_dict={"temperature": 0.4, "max_tokens": 16384},  # max to set. Otherwise it will fails
-        ),
-        "assistant": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="ep-20250212105505-5zlbx",  # doubao-1.5-pro
-            api_key=os.getenv("ARK_API_KEY"),
-            url=os.getenv("ARK_API_BASE_URL"),
-            model_config_dict={"temperature": 0.4, "max_tokens": 16384},
-        ),
-        "browsing": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="ep-20241217114719-kcgs9",  # doubao-vision-pro
-            api_key=os.getenv("ARK_API_KEY"),
-            url=os.getenv("ARK_API_BASE_URL"),
-            model_config_dict={"temperature": 0.4, "max_tokens": 4096},
-        ),
-        "planning": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="ep-20250212105505-5zlbx",  # doubao-1.5-pro
-            api_key=os.getenv("ARK_API_KEY"),
-            url=os.getenv("ARK_API_BASE_URL"),
-            model_config_dict={"temperature": 0.4, "max_tokens": 16384},
-        ),
-        "image": ModelFactory.create(
-            model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
-            model_type="ep-20241217114719-kcgs9",  # doubao-vision-pro
-            api_key=os.getenv("ARK_API_KEY"),
-            url=os.getenv("ARK_API_BASE_URL"),
-            model_config_dict={"temperature": 0.4, "max_tokens": 4096},
-        ),
+        "user": ModelFactory.create(**base_model_config),
+        "assistant": ModelFactory.create(**base_model_config),
+        "browsing": ModelFactory.create(**vision_model_config),
+        "planning": ModelFactory.create(**base_model_config),
+        "image": ModelFactory.create(**vision_model_config),
     }
 
     # Configure toolkits

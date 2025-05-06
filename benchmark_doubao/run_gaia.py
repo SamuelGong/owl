@@ -7,7 +7,7 @@ import traceback
 
 from datasets import load_dataset
 
-from examples.run_azure_openai import construct_society
+from examples.run_ark import construct_society
 from owl.utils import run_society
 
 
@@ -126,17 +126,32 @@ def main():
                 output_path = os.path.join(log_dir, f"{task_id}.txt")
                 query = gaia.task2query(task, output_path)
 
+                retry_time = 0
                 final_answer = ""
-                start_time = time.perf_counter()
-                try:
-                    call_agent(query, log_path)
-                except Exception as e:
-                    print(f"Task {task_id} failed due to error {e}\n{traceback.format_exc()}")
-                else:
+                while retry_time < retry_limit:
+                    retry_time += 1
+
+                    start_time = time.perf_counter()
                     try:
-                        final_answer = read_final_answer(output_path)
+                        call_agent(query, log_path)
                     except Exception as e:
-                        print(f"Result extraction for {task_id} failed due to error {e}\n{traceback.format_exc()}")
+                        print(f"Retrying task {task_id} for the {retry_time}th time due to error {e}")
+                        print(traceback.format_exc())
+                        continue
+
+                    # comment out as now we are in relax mode
+                    if not os.path.exists(output_path):
+                        print(f"Retrying task {task_id} for the {retry_time}th time "
+                              f"as no output file generated")
+                        continue
+                    else:
+                        final_answer = read_final_answer(output_path)
+
+                        if not final_answer:
+                            print(f"Retrying task {task_id} for the {retry_time}th time "
+                                  f"as final answer cannot be found in the output file")
+                            continue
+                    break
 
                 end_time = time.perf_counter()
                 duration = round(end_time - start_time, 3)
@@ -147,6 +162,7 @@ def main():
 
                 processed_tasks.add(task_id)
                 print(f"\tProcessed task {task_id} in {duration}s.")
+
 
 if __name__ == '__main__':
     main()

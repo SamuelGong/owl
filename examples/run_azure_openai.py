@@ -52,22 +52,32 @@ def construct_society(question: str) -> OwlRolePlaying:
     # Create models for different components using Azure OpenAI
     base_model_config = {
         "model_platform": ModelPlatformType.AZURE,
-        "model_type": os.getenv("AZURE_OPENAI_MODEL_TYPE"),
-        "model_config_dict": ChatGPTConfig(temperature=0.4, max_tokens=4096).as_dict(),
+        "model_type": "gpt-4",
+        "api_key": os.getenv("AZURE_OPENAI_API_KEY"),
+        "url": os.getenv("AZURE_OPENAI_BASE_URL"),
+        "model_config_dict": ChatGPTConfig(temperature=0.4).as_dict(),
+    }
+    vision_model_config = {
+        "model_platform": ModelPlatformType.AZURE,
+        "model_type": "gpt-4o",
+        "api_key": os.getenv("AZURE_OPENAI_API_KEY"),
+        "url": os.getenv("AZURE_OPENAI_BASE_URL"),
+        "model_config_dict": ChatGPTConfig(temperature=0.4).as_dict(),
     }
 
     models = {
         "user": ModelFactory.create(**base_model_config),
         "assistant": ModelFactory.create(**base_model_config),
-        "browsing": ModelFactory.create(**base_model_config),
+        "browsing": ModelFactory.create(**vision_model_config),
         "planning": ModelFactory.create(**base_model_config),
-        "image": ModelFactory.create(**base_model_config),
+        "image": ModelFactory.create(**vision_model_config),
     }
 
     # Configure toolkits
     tools = [
         *BrowserToolkit(
-            headless=False,  # Set to True for headless mode (e.g., on remote servers)
+            # headless=False,  # Set to True for headless mode (e.g., on remote servers)
+            headless=True,  # Set to True for headless mode (e.g., on remote servers)
             web_agent_model=models["browsing"],
             planning_agent_model=models["planning"],
         ).get_tools(),
